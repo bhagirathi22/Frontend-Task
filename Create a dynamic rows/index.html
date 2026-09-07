@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dynamic Table Rows</title>
+	<style>
+		:root {
+			font-family: Arial, sans-serif;
+			color: #172033;
+			background: #eef3f8;
+		}
+
+		body {
+			display: grid;
+			min-height: 100vh;
+			margin: 0;
+			padding: 2rem 1rem;
+			place-items: center;
+		}
+
+		main {
+			width: min(100%, 780px);
+			padding: 2rem;
+			border: 1px solid #d7e0ea;
+			border-radius: 8px;
+			background: #ffffff;
+			box-shadow: 0 12px 30px rgb(23 32 51 / 10%);
+		}
+
+		h1 {
+			margin: 0 0 0.4rem;
+		}
+
+		.description,
+		#row-count {
+			color: #617087;
+		}
+
+		.description {
+			margin-top: 0;
+		}
+
+		form {
+			display: grid;
+			grid-template-columns: 1fr 1.5fr auto;
+			gap: 0.75rem;
+			margin: 1.5rem 0 1rem;
+		}
+
+		input,
+		button {
+			padding: 0.7rem;
+			border-radius: 4px;
+			font: inherit;
+		}
+
+		input {
+			min-width: 0;
+			border: 1px solid #aebccc;
+		}
+
+		button {
+			cursor: pointer;
+			border: 0;
+			font-weight: 700;
+		}
+
+		#add-row {
+			color: #ffffff;
+			background: #1769aa;
+		}
+
+		.table-wrap {
+			overflow-x: auto;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		th,
+		td {
+			padding: 0.8rem;
+			text-align: left;
+			border-bottom: 1px solid #e0e7ef;
+		}
+
+		th {
+			color: #4e6078;
+			background: #f7f9fc;
+			font-size: 0.85rem;
+			text-transform: uppercase;
+		}
+
+		.delete-row {
+			color: #a32828;
+			background: #fff0f0;
+		}
+
+		#empty-message {
+			padding: 1.5rem;
+			color: #617087;
+			text-align: center;
+		}
+
+		@media (max-width: 600px) {
+			form {
+				grid-template-columns: 1fr;
+			}
+
+			#add-row {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<h1>Dynamic table rows</h1>
+		<p class="description">Enter an item and its details to add a new row.</p>
+
+		<form id="row-form">
+			<input id="item-name" name="itemName" type="text" placeholder="Item name" required>
+			<input id="item-details" name="itemDetails" type="text" placeholder="Details" required>
+			<button id="add-row" type="submit">Add row</button>
+		</form>
+
+		<p id="row-count" aria-live="polite">0 rows</p>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th scope="col">Item</th>
+						<th scope="col">Details</th>
+						<th scope="col">Action</th>
+					</tr>
+				</thead>
+				<tbody id="table-body"></tbody>
+			</table>
+			<div id="empty-message">No rows added yet.</div>
+		</div>
+	</main>
+
+	<script>
+		const rowForm = document.querySelector('#row-form');
+		const itemName = document.querySelector('#item-name');
+		const itemDetails = document.querySelector('#item-details');
+		const tableBody = document.querySelector('#table-body');
+		const rowCount = document.querySelector('#row-count');
+		const emptyMessage = document.querySelector('#empty-message');
+
+		function updateTableState() {
+			const count = tableBody.rows.length;
+			rowCount.textContent = `${count} ${count === 1 ? 'row' : 'rows'}`;
+			emptyMessage.hidden = count > 0;
+		}
+
+		rowForm.addEventListener('submit', (event) => {
+			event.preventDefault();
+
+			const row = document.createElement('tr');
+			const nameCell = document.createElement('td');
+			const detailsCell = document.createElement('td');
+			const actionCell = document.createElement('td');
+			const deleteButton = document.createElement('button');
+
+			nameCell.textContent = itemName.value;
+			detailsCell.textContent = itemDetails.value;
+			deleteButton.className = 'delete-row';
+			deleteButton.type = 'button';
+			deleteButton.textContent = 'Delete';
+			actionCell.append(deleteButton);
+			row.append(nameCell, detailsCell, actionCell);
+			tableBody.append(row);
+			rowForm.reset();
+			itemName.focus();
+			updateTableState();
+		});
+
+		tableBody.addEventListener('click', (event) => {
+			if (event.target.matches('.delete-row')) {
+				event.target.closest('tr').remove();
+				updateTableState();
+			}
+		});
+	</script>
+</body>
+</html>
